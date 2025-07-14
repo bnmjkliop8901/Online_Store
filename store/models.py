@@ -15,7 +15,13 @@ class Address(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.label} , {self.user.username}"
+        return (
+            f"{self.label} - {self.address_line_1}, {self.address_line_2}, "
+            f"{self.city}, {self.state}, {self.postal_code}, {self.country} "
+            f"(User: {self.user.username})"
+        )
+
+
 
 
 class Category(models.Model):
@@ -26,7 +32,8 @@ class Category(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
-        return self.name
+        return f"Category: {self.name}, Description: {self.description}, Active: {self.is_active}, Parent: {self.parent}"
+
 
 
 class Product(models.Model):
@@ -37,7 +44,8 @@ class Product(models.Model):
     categories = models.ManyToManyField(Category, related_name='products')
 
     def __str__(self):
-        return self.name
+        return f"Product: {self.name}, Rating: {self.rating}, Active: {self.is_active}, Categories: {[c.name for c in self.categories.all()]}"
+
 
 
 class ProductImage(models.Model):
@@ -45,7 +53,8 @@ class ProductImage(models.Model):
     image = models.ImageField(upload_to='product_images/')
 
     def __str__(self):
-        return f"Image for {self.product.name}"
+        return f"ProductImage for {self.product.name}, URL: {self.image.url}"
+
 
 
 
@@ -55,7 +64,8 @@ class Store(models.Model):
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='stores')
 
     def __str__(self):
-        return self.name
+        return f"Store: {self.name}, Description: {self.description}, Seller: {self.seller.username}"
+
 
 
 
@@ -70,7 +80,11 @@ class StoreItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.product.name} - {self.store.name}"
+        return (
+            f"{self.product.name} at {self.store.name}, Price: {self.price}, "
+            f"Discount: {self.discount_price}, Stock: {self.stock}, Active: {self.is_active}"
+        )
+
 
 
 
@@ -79,7 +93,8 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Cart of {self.user.username}"
+        return f"Cart (User: {self.user.username}) - Created: {self.created_at}"
+
 
 
 
@@ -92,7 +107,11 @@ class CartItem(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.quantity} of {self.store_item.product.name}"
+        return (
+            f"{self.quantity} x {self.store_item.product.name} "
+            f"@ {self.unit_price} (Total: {self.total_item_price}, Discount: {self.total_discount})"
+        )
+
 
 
 
@@ -113,7 +132,12 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Order #{self.pk} by {self.user.username}"
+        status_display = dict(self.STATUS_CHOICES).get(self.status, "Unknown")
+        return (
+            f"Order #{self.pk} (User: {self.user.username}), Status: {status_display}, "
+            f"Address: {self.address}, Total: {self.total_price}"
+        )
+
 
 
 
@@ -125,7 +149,11 @@ class OrderItem(models.Model):
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.quantity} x {self.store_item.product.name}"
+        return (
+            f"{self.quantity} x {self.store_item.product.name} "
+            f"at {self.store_item.price} (Total: {self.total_price})"
+        )
+
 
 
 class Payment(models.Model):
@@ -140,7 +168,11 @@ class Payment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Payment for Order #{self.order.id}"
+        return (
+            f"Payment for Order #{self.order.id}, TxID: {self.transaction_id}, "
+            f"Amount: {self.amount}, Fee: {self.fee}, Status: {self.status}"
+        )
+
 
 
 
@@ -153,5 +185,6 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Review by {self.user.username}"
+        target = self.product.name if self.product else self.store.name
+        return f"Review by {self.user.username} on {target} — Rating: {self.rating}"
 
