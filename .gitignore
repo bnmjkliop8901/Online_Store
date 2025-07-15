@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.env
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+eggs/
+*.egg
+*.egg-info/
+*.manifest
+*.spec
+
+# Django
+db.sqlite3
+*.db
+*.pyc
+media/
+staticfiles/
+local_settings.py
+
+# Celery & Redis
+celerybeat-schedule
+*.pid
+
+# Docker
+*.pid
+*.db
+docker-compose.override.yml
+*.log
+
+# PostgreSQL
+*.sql
+*.dump
+
+# Node / React
+node_modules/
+*.log
+build/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# VS Code
+.vscode/
+
+# OS generated
+.DS_Store
+Thumbs.db
