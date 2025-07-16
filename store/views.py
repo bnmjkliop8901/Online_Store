@@ -23,7 +23,6 @@ class StoreViewSet(viewsets.ModelViewSet):
 class StoreItemViewSet(viewsets.ModelViewSet):
     queryset = StoreItem.objects.select_related('store', 'product')
     serializer_class = StoreItemSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.select_related('user', 'product', 'store')
