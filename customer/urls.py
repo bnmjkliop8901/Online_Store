@@ -1,8 +1,9 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import (
+from customer.views import (
     CustomerViewSet, AddressViewSet,
-    RegisterView
+    RegisterView ,
+    RequestOTPView, VerifyOTPView
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -17,4 +18,7 @@ urlpatterns = router.urls + [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    path('otp/request/', RequestOTPView.as_view(), name='request_otp'),
+    path('otp/verify/', VerifyOTPView.as_view(), name='verify_otp'),
 ]

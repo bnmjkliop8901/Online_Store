@@ -65,13 +65,20 @@ class OrderItem(models.Model):
 
 
 class Payment(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+    (1, 'Pending'),
+    (2, 'Verified'),
+    (3, 'Failed'),
+    (4, 'Refunded'),
+]
+
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     transaction_id = models.CharField(max_length=100)
     reference_id = models.CharField(max_length=100)
     card_pan = models.CharField(max_length=20)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     fee = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.PositiveSmallIntegerField(default=1)
+    status = models.PositiveSmallIntegerField(choices=PAYMENT_STATUS_CHOICES,default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
