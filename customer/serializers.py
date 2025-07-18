@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Customer, Address
+from customer.models import Customer, Address
 
 
 class AddressCreateSerializer(serializers.ModelSerializer):
