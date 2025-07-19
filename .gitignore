@@ -60,4 +60,4 @@ build/
 Thumbs.db
 
 
-.venv
+.venv/
