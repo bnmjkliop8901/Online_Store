@@ -5,7 +5,7 @@ from customer.models import Customer, Address
 class AddressCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        exclude = ['user']
+        exclude = ['user', 'is_deleted']
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
@@ -16,20 +16,19 @@ class AddressCreateSerializer(serializers.ModelSerializer):
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = '__all__'
+        exclude = ['is_deleted', 'user']
         read_only_fields = ('user',)
 
 
 
 class CustomerSerializer(serializers.ModelSerializer):
     addresses = AddressSerializer(many=True, read_only=True)
-
+    
     class Meta:
         model = Customer
-        fields = [
-            'id', 'username', 'email', 'first_name', 'last_name', 'phone', 'addresses'
-        ]
-        read_only_fields = ['id']
+        exclude = ['is_deleted']
+        read_only_fields = ['id', 'username', 'email', 'is_seller']
+
 
 
 

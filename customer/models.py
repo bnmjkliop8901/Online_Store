@@ -5,6 +5,12 @@ class Customer(AbstractUser):
     phone = models.CharField(max_length=20, null=True, blank=True)
     picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
     is_seller = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.is_active = False
+        self.save()
 
     def __str__(self):
         return (
@@ -24,6 +30,11 @@ class Address(models.Model):
     country = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.save()
 
     def __str__(self):
         return (
