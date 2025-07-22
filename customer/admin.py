@@ -18,21 +18,21 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ['username', 'email', 'phone']
     actions = ['restore_customer']
 
-    # 🔍 Allow viewing all customers for testing
+
     def get_queryset(self, request):
         return super().get_queryset(request)
 
-    # 🔐 Secure password change link
+
     def change_password_link(self, obj):
         return format_html('<a href="password/{}/">Change Password</a>', obj.pk)
     change_password_link.short_description = 'Password'
 
-    # 🔄 Restore soft-deleted customers
+
     @admin.action(description="Restore selected customers")
     def restore_customer(self, request, queryset):
         queryset.update(is_deleted=False, is_active=True)
 
-    # 🔗 Add custom admin view for password change
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
@@ -78,7 +78,7 @@ class AddressAdmin(admin.ModelAdmin):
     autocomplete_fields = ['user']
     actions = ['restore_address']
 
-    # 🔍 Show all addresses for testing purposes
+
     def get_queryset(self, request):
         return super().get_queryset(request)
 
