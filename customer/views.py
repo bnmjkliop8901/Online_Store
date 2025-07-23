@@ -22,7 +22,7 @@ class MeView(APIView):
         serializer = CustomerSerializer(request.user)
         return Response(serializer.data)
 
-    def put(self, request):
+    def put(self, request): # put and patch
         serializer = CustomerSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -58,7 +58,7 @@ class RequestOTPView(APIView):
             return Response({"error": "User not found."}, status=404)
 
 
-# ✅ OTP Verify
+
 class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
 

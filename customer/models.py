@@ -5,7 +5,7 @@ class Customer(AbstractUser):
     phone = models.CharField(max_length=20, null=True, blank=True)
     picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
     is_seller = models.BooleanField(default=False)
-    is_deleted = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False) # for soft delete
 
     def delete(self, *args, **kwargs):
         self.is_deleted = True
@@ -20,7 +20,7 @@ class Customer(AbstractUser):
 
 
 class Address(models.Model):
-    user = models.ForeignKey('Customer', on_delete=models.CASCADE, related_name='addresses')
+    user = models.ForeignKey('Customer', on_delete=models.CASCADE, related_name='addresses') # for accessing all user's addressess (user.addresses)
     label = models.CharField(max_length=50)
     address_line_1 = models.CharField(max_length=255)
     address_line_2 = models.CharField(max_length=255, blank=True)
