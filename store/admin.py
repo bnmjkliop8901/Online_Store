@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from .models import Category, Product, ProductImage, Store, StoreItem, Review
 
 @admin.register(Category)
@@ -26,6 +27,15 @@ class StoreAdmin(admin.ModelAdmin):
     list_display = ['name', 'seller']
     search_fields = ['name', 'seller__username']
     autocomplete_fields = ['seller']
+
+    def save_model(self, request, obj, form, change):
+        if not getattr(request.user, 'is_seller', False):
+            raise ValidationError("You must be a seller to create a store.")
+        obj.seller = request.user
+        super().save_model(request, obj, form, change)
+    
+    def has_module_permission(self, request):
+        return getattr(request.user, 'is_seller', False)
 
 @admin.register(StoreItem)
 class StoreItemAdmin(admin.ModelAdmin):

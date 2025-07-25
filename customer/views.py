@@ -19,11 +19,11 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = CustomerSerializer(request.user)
+        serializer = CustomerSerializer(request.user, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request): # put and patch
-        serializer = CustomerSerializer(request.user, data=request.data, partial=True)
+        serializer = CustomerSerializer(request.user, data=request.data, context={'request': request} ,partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

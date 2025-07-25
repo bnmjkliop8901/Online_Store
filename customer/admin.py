@@ -5,6 +5,7 @@ from .models import Customer, Address
 
 @admin.register(Customer)
 class CustomerAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + ((None, {'fields': ('phone', 'is_seller', 'is_deleted')}),)
     list_display = [
         'username', 'email', 'phone',
         'is_seller', 'is_staff', 'is_active',
