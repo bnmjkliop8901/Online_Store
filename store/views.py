@@ -1,9 +1,9 @@
-from rest_framework import viewsets
+from rest_framework import viewsets , status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly , IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Category, Product, ProductImage, Store, StoreItem, Review
-from .serializers import (
+from store.models import Category, Product, ProductImage, Store, StoreItem, Review
+from store.serializers import (
     CategorySerializer,
     ProductSerializer,
     ProductDetailSerializer,
@@ -14,10 +14,11 @@ from .serializers import (
     CategoryTreeSerializer,
     ProductWriteSerializer
 )
-from .filters import ProductFilter
-from .permissions import IsSeller
-from rest_framework.decorators import api_view
+from store.filters import ProductFilter
+from store.permissions import IsSeller
+from rest_framework.decorators import api_view , action
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -33,6 +34,20 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Category.objects.filter(is_active=True)
 
 
+# class ProductViewSet(viewsets.ModelViewSet):
+#     queryset = Product.objects.prefetch_related('categories', 'images').order_by('id')
+#     filterset_class = ProductFilter
+#     filter_backends = [DjangoFilterBackend]
+
+#     def get_serializer_class(self):
+#         if self.action in ['create', 'update', 'partial_update']:
+#             return ProductWriteSerializer
+#         if self.action == 'retrieve':
+#             return ProductDetailSerializer
+#         return ProductSerializer
+
+
+
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.prefetch_related('categories', 'images').order_by('id')
     filterset_class = ProductFilter
@@ -44,6 +59,28 @@ class ProductViewSet(viewsets.ModelViewSet):
         if self.action == 'retrieve':
             return ProductDetailSerializer
         return ProductSerializer
+
+    @action(detail=True, methods=['get'], url_path='review_list')
+    def review_list(self, request, pk=None):
+        product = self.get_object()
+        reviews = Review.objects.filter(product=product).order_by('-created_at')
+
+        paginator = PageNumberPagination()
+        paginator.page_size = request.query_params.get('page_size', 5)
+        paginated_reviews = paginator.paginate_queryset(reviews, request)
+
+        serializer = ReviewSerializer(paginated_reviews, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='review_create', permission_classes=[IsAuthenticated])
+    def review_create(self, request, pk=None):
+        product = self.get_object()
+        serializer = ReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user, product=product)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProductImageViewSet(viewsets.ModelViewSet):
     queryset = ProductImage.objects.all()
@@ -58,13 +95,40 @@ class StoreViewSet(viewsets.ModelViewSet):
             return [IsAuthenticatedOrReadOnly()]
         return [IsAuthenticated(), IsSeller()]
     
+
+    @action(detail=False, methods=['get', 'put'], url_path='me')
+    def my_store(self, request):
+        store = Store.objects.filter(seller=request.user).first()
+        if not store:
+            return Response({"detail": "Store not found."}, status=404)
+
+        if request.method == 'GET':
+            serializer = self.get_serializer(store)
+            return Response(serializer.data)
+
+        # PUT request
+        serializer = self.get_serializer(store, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+# class StoreItemViewSet(viewsets.ModelViewSet):
+#     queryset = StoreItem.objects.select_related('store', 'product')
+#     serializer_class = StoreItemSerializer
 class StoreItemViewSet(viewsets.ModelViewSet):
-    queryset = StoreItem.objects.select_related('store', 'product')
     serializer_class = StoreItemSerializer
+
+    def get_queryset(self):
+        return StoreItem.objects.filter(store__seller=self.request.user)
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.select_related('user', 'product', 'store')
     serializer_class = ReviewSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class SellerStoreItemViewSet(viewsets.ModelViewSet):
@@ -97,19 +161,19 @@ class SellerProductViewSet(viewsets.ModelViewSet):
     permission_classes = [IsSeller]
 
     def get_queryset(self):
-        return Product.objects.filter(
-            storeitem__store__seller=self.request.user
-        ).distinct()
+        return Product.objects.filter(storeitem__store__seller=self.request.user).distinct()
 
+    # def perform_create(self, serializer):
+    #     product = serializer.save()
+    #     StoreItem.objects.create(
+    #         product=product,
+    #         store=self.request.user.stores.first(),
+    #         price=0,
+    #         stock=0,
+    #         is_active=False
+    #     )
     def perform_create(self, serializer):
-        product = serializer.save()
-        StoreItem.objects.create(
-            product=product,
-            store=self.request.user.stores.first(),
-            price=0,
-            stock=0,
-            is_active=False
-        )
+        serializer.save()
 
 
 class SellerCategoryViewSet(viewsets.ModelViewSet):

@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from django.db.models import Min, Count
-from .models import Category, Product, ProductImage, Store, StoreItem, Review
+from store.models import Category, Product, ProductImage, Store, StoreItem, Review
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,9 +39,14 @@ class ProductWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'description', 'rating',
-            'is_active', 'categories'
+            'id',
+            'name',
+            'description',
+            'is_active',
+            'rating',
+            'categories',
         ]
+
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -117,6 +124,7 @@ class StoreItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoreItem
         fields = '__all__'
+        
     def validate(self, data):
         price = data.get('price')
         discount_price = data.get('discount_price')
@@ -126,10 +134,26 @@ class StoreItemSerializer(serializers.ModelSerializer):
             })
         return data
 
+
+# class ReviewUserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['username', 'first_name', 'last_name', 'picture']
+
+# class ReviewSerializer(serializers.ModelSerializer):
+#     # user = ReviewUserSerializer(read_only=True)
+
+#     class Meta:
+#         model = Review
+#         fields = ['id', 'user', 'rating', 'comment', 'created_at']
+#         read_only_fields = ['id', 'created_at']
+
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = ['id', 'user', 'product', 'store', 'rating', 'comment', 'created_at']
+        read_only_fields = ['id', 'created_at', 'user']
+
 
 
 class CategoryTreeSerializer(serializers.ModelSerializer):
