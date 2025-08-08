@@ -105,7 +105,7 @@ def cart_item(cart, store_item):
         total_discount=0
     )
 
-# 🛒 Cart Tests
+
 def test_cart_list(client):
     res = client.get("/api/carts/")
     assert res.status_code == 200

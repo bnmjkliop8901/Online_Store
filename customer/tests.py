@@ -8,11 +8,11 @@ User = get_user_model()
 @pytest.fixture
 def user(db):
     return User.objects.create_user(
-        username="soheil123",
-        email="soheil@example.com",
-        password="testpass123",
+        username="soheil1111",
+        email="soheil@gmail.com",
+        password="blackroom",
         first_name="Soheil",
-        last_name="Engineer"
+        last_name="K"
     )
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def address(db, user):
     return Address.objects.create(
         user=user,
         label="Home",
-        address_line_1="Valiasr Street",
+        address_line_1="Shahran",
         address_line_2="",
         city="Tehran",
         state="Tehran",
@@ -36,26 +36,26 @@ def address(db, user):
 
 def test_register(db):
     res = APIClient().post("/api/auth/register/", {
-        "username": "newuser",
-        "email": "newuser@example.com",
-        "password": "newpass123",
-        "first_name": "New",
-        "last_name": "User",
+        "username": "new",
+        "email": "newuser@gmail.com",
+        "password": "new123",
+        "first_name": "new",
+        "last_name": "nneeww",
         "phone": "09121234567"
     }, format="json")
     assert res.status_code == 201
 
 def test_request_otp(db):
-    User.objects.create_user(username="otpuser", password="otp123")
+    User.objects.create_user(username="otpppp", password="otp123")
     res = APIClient().post("/api/accounts/request-otp/", {
-        "username": "otpuser"
+        "username": "otpppp"
     }, format="json")
     assert res.status_code in [200, 201, 400]
 
 def test_verify_otp(db):
-    User.objects.create_user(username="otpuser", password="otp123")
+    User.objects.create_user(username="otpppp", password="otp123")
     res = APIClient().post("/api/accounts/verify-otp/", {
-        "username": "otpuser",
+        "username": "otpppp",
         "otp": "123456"
     }, format="json")
     assert res.status_code in [200, 400]
@@ -69,7 +69,7 @@ def test_update_profile(client):
 def test_create_address(client):
     res = client.post("/api/addresses/", {
         "label": "Home",
-        "address_line_1": "Valiasr Street",
+        "address_line_1": "Tehran",
         "address_line_2": "",
         "city": "Tehran",
         "state": "Tehran",
@@ -87,7 +87,7 @@ def test_list_addresses(client, address):
 def test_update_address(client, address):
     res = client.put(f"/api/addresses/{address.id}/", {
         "label": "Work",
-        "address_line_1": "Enghelab Street",
+        "address_line_1": "Street",
         "address_line_2": "",
         "city": "Tehran",
         "state": "Tehran",
@@ -101,7 +101,7 @@ def test_delete_address(client, address):
     assert res.status_code == 204
 
 def test_admin_customer_access(db):
-    admin = User.objects.create_superuser(username="admin", email="admin@example.com", password="adminpass")
+    admin = User.objects.create_superuser(username="admin", email="admin@gmail.com", password="adminpass")
     client = APIClient()
     client.force_authenticate(user=admin)
     res = client.get("/api/admin-customers/")
@@ -110,7 +110,7 @@ def test_admin_customer_access(db):
     assert isinstance(res.data["results"], list)
 
 def test_admin_address_access(db):
-    admin = User.objects.create_superuser(username="admin", email="admin@example.com", password="adminpass")
+    admin = User.objects.create_superuser(username="admin", email="admin@gmail.com", password="adminpass")
     client = APIClient()
     client.force_authenticate(user=admin)
     res = client.get("/api/admin-addresses/")
