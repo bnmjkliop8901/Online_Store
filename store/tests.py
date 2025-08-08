@@ -3,10 +3,20 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 from store.models import Category, Product, ProductImage, Store, StoreItem, Review
 from django.contrib.auth import get_user_model
+from PIL import Image
+import io
 
 User = get_user_model()
 
-# Fixtures
+
+def generate_test_image(name="test.jpg"):
+    file = io.BytesIO()
+    image = Image.new("RGB", (100, 100), color="red")
+    image.save(file, "JPEG")
+    file.seek(0)
+    return SimpleUploadedFile(name, file.read(), content_type="image/jpeg")
+
+
 @pytest.fixture
 def test_user(db):
     return User.objects.create_user(username="testuser", password="testpass", is_seller=True)
@@ -19,7 +29,7 @@ def api_client(test_user):
 
 @pytest.fixture
 def category(db):
-    image = SimpleUploadedFile("cat.jpg", b"image_data", content_type="image/jpeg")
+    image = generate_test_image("cat.jpg")
     return Category.objects.create(name="Electronics", description="Tech stuff", image=image, is_active=True)
 
 @pytest.fixture
@@ -36,7 +46,7 @@ def store(db, test_user):
 def store_item(db, product, store):
     return StoreItem.objects.create(product=product, store=store, price=20000, stock=5)
 
-# Category
+
 @pytest.mark.django_db
 def test_category_list(api_client, category):
     response = api_client.get("/api/categories/")
@@ -45,14 +55,13 @@ def test_category_list(api_client, category):
 
 @pytest.mark.django_db
 def test_category_create(api_client):
-    image = SimpleUploadedFile("cat.jpg", b"image_data", content_type="image/jpeg")
+    image = generate_test_image("cat.jpg")
     response = api_client.post("/api/categories/", {
         "name": "Books",
         "description": "All kinds of books",
         "is_active": True,
         "image": image
     }, format="multipart")
-    print("Category create response:", response.data)
     assert response.status_code == 201
     assert response.data["name"] == "Books"
 
@@ -62,7 +71,7 @@ def test_category_tree(api_client, category):
     assert response.status_code == 200
     assert isinstance(response.data, list)
 
-# Product
+
 @pytest.mark.django_db
 def test_product_list(api_client, product):
     response = api_client.get("/api/products/")
@@ -80,19 +89,18 @@ def test_product_create(api_client, category):
     assert response.status_code == 201
     assert response.data["name"] == "Laptop"
 
-# Product Images
+
 @pytest.mark.django_db
 def test_product_image_upload(api_client, product):
-    image = SimpleUploadedFile("test.jpg", b"file_content", content_type="image/jpeg")
+    image = generate_test_image("test.jpg")
     response = api_client.post("/api/product-images/", {
         "product": product.id,
         "image": image
     }, format="multipart")
-    print("Product image upload response:", response.data)
     assert response.status_code == 201
     assert "image" in response.data
 
-# Store
+
 @pytest.mark.django_db
 def test_store_list(api_client, store):
     response = api_client.get("/api/mystore/")
@@ -105,11 +113,10 @@ def test_store_create(api_client):
         "name": "Bookstore",
         "description": "Books and more"
     }, format="json")
-    print("Store create response:", response.data)
     assert response.status_code == 201
     assert response.data["name"] == "Bookstore"
 
-# Store Item
+
 @pytest.mark.django_db
 def test_store_item_list(api_client, store_item):
     response = api_client.get("/api/store-items/")
@@ -127,7 +134,7 @@ def test_store_item_create(api_client, product, store):
     assert response.status_code == 201
     assert response.data["price"] == "30000.00"
 
-# Review
+
 @pytest.mark.django_db
 def test_review_create_for_product(api_client, product):
     response = api_client.post(f"/api/products/{product.id}/review_create/", {
@@ -154,7 +161,7 @@ def test_review_list(api_client, product, test_user):
     assert response.status_code == 200
     assert any(r["rating"] == 4 for r in response.data["results"])
 
-# Seller APIs
+
 @pytest.mark.django_db
 def test_seller_store_list(api_client, store):
     response = api_client.get("/api/seller/stores/")
@@ -176,13 +183,12 @@ def test_seller_category_list(api_client, category):
 
 @pytest.mark.django_db
 def test_seller_category_create(api_client):
-    image = SimpleUploadedFile("cat2.jpg", b"image_data", content_type="image/jpeg")
+    image = generate_test_image("cat2.jpg")
     response = api_client.post("/api/seller/categories/", {
         "name": "Accessories",
         "description": "Phone accessories",
         "is_active": True,
         "image": image
     }, format="multipart")
-    print("Seller category create response:", response.data)
     assert response.status_code == 201
     assert response.data["name"] == "Accessories"

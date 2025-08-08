@@ -48,7 +48,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Cart.objects.filter(user=user).prefetch_related('items')
+        return Cart.objects.filter(user=user).prefetch_related('items').order_by('id')
 
 
 

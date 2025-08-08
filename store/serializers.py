@@ -17,10 +17,16 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# class StoreSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Store
+#         fields = '__all__'
+
+###############new
 class StoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Store
-        fields = '__all__'
+        fields = ['id', 'name', 'description']  # exclude 'seller'
 
 
 class StoreItemBasicSerializer(serializers.ModelSerializer):

@@ -95,6 +95,10 @@ class StoreViewSet(viewsets.ModelViewSet):
             return [IsAuthenticatedOrReadOnly()]
         return [IsAuthenticated(), IsSeller()]
     
+    def perform_create(self, serializer):
+        serializer.save(seller=self.request.user)
+
+    
 
     @action(detail=False, methods=['get', 'put'], url_path='me')
     def my_store(self, request):
