@@ -5,10 +5,12 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from kavenegar import KavenegarAPI
 from decouple import config
+from django.conf import settings
+
+KAVENEGAR_API_KEY = settings.KAVENEGAR_API_KEY
+EMAIL_HOST_USER = settings.EMAIL_HOST_USER
 
 
-KAVENEGAR_API_KEY = config("KAVENEGAR_API_KEY")
-EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 
 
 

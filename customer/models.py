@@ -12,6 +12,13 @@ class Customer(AbstractUser):
         self.is_active = False
         self.save()
 
+    def hard_delete(self, request_user):
+        if request_user.is_staff or request_user.is_superuser:
+            super().delete()
+        else:
+            raise PermissionError("You do not have permission to hard delete.")
+
+
     def __str__(self):
         return (
             f"Username: {self.username}, Email: {self.email}, "
@@ -35,6 +42,12 @@ class Address(models.Model):
     def delete(self, *args, **kwargs):
         self.is_deleted = True
         self.save()
+
+    def hard_delete(self, request_user):
+        if request_user.is_staff or request_user.is_superuser:
+            super().delete()
+        else:
+            raise PermissionError("You do not have permission to hard delete.")
 
     def __str__(self):
         return (

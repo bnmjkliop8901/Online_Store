@@ -50,7 +50,7 @@ def test_request_otp(db):
     res = APIClient().post("/api/accounts/request-otp/", {
         "username": "otpppp"
     }, format="json")
-    assert res.status_code in [200, 201, 400]
+    assert res.status_code in [200, 201, 400] #########
 
 def test_verify_otp(db):
     User.objects.create_user(username="otpppp", password="otp123")
@@ -58,7 +58,7 @@ def test_verify_otp(db):
         "username": "otpppp",
         "otp": "123456"
     }, format="json")
-    assert res.status_code in [200, 400]
+    assert res.status_code in [200, 400]   #############
 
 def test_update_profile(client):
     res = client.put("/api/myuser/", {
@@ -109,6 +109,7 @@ def test_admin_customer_access(db):
     assert "results" in res.data
     assert isinstance(res.data["results"], list)
 
+
 def test_admin_address_access(db):
     admin = User.objects.create_superuser(username="admin", email="admin@gmail.com", password="adminpass")
     client = APIClient()
@@ -117,3 +118,50 @@ def test_admin_address_access(db):
     assert res.status_code == 200
     assert "results" in res.data
     assert isinstance(res.data["results"], list)
+
+
+
+
+def test_admin_update_address(db):
+    admin = User.objects.create_superuser(username="admin", email="admin@gmail.com", password="adminpass")
+    address = Address.objects.create(
+        user=admin,
+        label="Old",
+        address_line_1="Old",
+        city="Tehran",
+        state="Tehran",
+        postal_code="0000000000",
+        country="Iran"
+    )
+    client = APIClient()
+    client.force_authenticate(user=admin)
+    res = client.put(f"/api/admin-addresses/{address.id}/", {
+        "user": admin.id,
+        "label": "New",
+        "address_line_1": "New",
+        "address_line_2": "",
+        "city": "Tehran",
+        "state": "Tehran",
+        "postal_code": "999999999",
+        "country": "Iran"
+    }, format="json")
+    assert res.status_code == 200
+
+
+
+def test_admin_delete_address(db):
+    admin = User.objects.create_superuser(username="admin", email="admin@gmail.com", password="adminpass")
+    address = Address.objects.create(
+        user=admin,
+        label="To Delete",
+        address_line_1="Delete St",
+        city="Tehran",
+        state="Tehran",
+        postal_code="1231231234",
+        country="Iran"
+    )
+    client = APIClient()
+    client.force_authenticate(user=admin)
+    res = client.delete(f"/api/admin-addresses/{address.id}/")
+    assert res.status_code == 204
+

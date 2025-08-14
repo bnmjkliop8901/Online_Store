@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Cart, CartItem, Order, OrderItem, Payment
 from store.serializers import StoreItemSerializer
+from django.db.models import Sum
 from customer.serializers import AddressSerializer
 from store.models import StoreItem
 
@@ -57,6 +58,57 @@ class CartItemSerializer(serializers.ModelSerializer):
             total_item_price=total_price,
             total_discount=total_discount
         )
+# class CartItemSerializer(serializers.ModelSerializer):
+#     store_item = serializers.PrimaryKeyRelatedField(queryset=StoreItem.objects.all())
+
+#     class Meta:
+#         model = CartItem
+#         fields = [
+#             'id', 'store_item', 'quantity',
+#             'unit_price', 'total_item_price', 'total_discount'
+#         ]
+#         read_only_fields = ['unit_price', 'total_item_price', 'total_discount']
+
+#     def validate(self, data):
+#         store_item = data['store_item']
+#         quantity = data['quantity']
+#         user = self.context['request'].user
+#         cart, _ = Cart.objects.get_or_create(user=user)
+
+#         existing_quantity = cart.items.filter(store_item=store_item).aggregate(
+#             total=serializers.models.Sum('quantity')
+#         )['total'] or 0
+
+#         total_requested = existing_quantity + quantity
+#         if total_requested > store_item.stock:
+#             raise serializers.ValidationError(
+#                 f"Total requested ({total_requested}) exceeds stock ({store_item.stock})"
+#             )
+
+#         return data
+
+# def create(self, validated_data):
+#     user = self.context['request'].user
+#     cart, _ = Cart.objects.get_or_create(user=user, is_active=True)  # ✅ only one active cart
+
+#     store_item = validated_data['store_item']
+#     quantity = validated_data['quantity']
+
+#     unit_price = store_item.discount_price or store_item.price
+#     total_price = unit_price * quantity
+#     discount_per_unit = (
+#         store_item.price - unit_price if store_item.discount_price else 0
+#     )
+#     total_discount = discount_per_unit * quantity
+
+#     return CartItem.objects.create(
+#         cart=cart,
+#         store_item=store_item,
+#         quantity=quantity,
+#         unit_price=unit_price,
+#         total_item_price=total_price,
+#         total_discount=total_discount
+#     )
 
 
 
@@ -115,7 +167,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = 'all'
+        fields = '__all__'
 
 
 

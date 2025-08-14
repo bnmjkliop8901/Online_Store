@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'django_filters',
     'store',
     'customer',
@@ -166,6 +167,8 @@ REFRESH_TOKEN_LIFETIME = config("REFRESH_TOKEN_LIFETIME_DAYS", default=1, cast=i
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=ACCESS_TOKEN_LIFETIME),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=REFRESH_TOKEN_LIFETIME),
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ROTATE_REFRESH_TOKENS": True,
 }
 
 
@@ -212,3 +215,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 SWAGGER_USE_COMPAT_RENDERERS = False
+
+
+KAVENEGAR_API_KEY = config("KAVENEGAR_API_KEY")
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")

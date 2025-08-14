@@ -189,6 +189,17 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = CustomerCreateSerializer
     permission_classes = [AllowAny]
 
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"detail": "Logged out successfully."}, status=205)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
 
 class RequestOTPView(APIView):
     permission_classes = [AllowAny]
@@ -255,18 +266,22 @@ class AddressViewSet(viewsets.ModelViewSet):
 
 
 class AdminCustomerViewSet(viewsets.ModelViewSet):
-    queryset = Customer.objects.filter(is_deleted=False).order_by("id")  # ✅ Added order_by
+    queryset = Customer.objects.filter(is_deleted=False).order_by("id")
     serializer_class = CustomerSerializer
     permission_classes = [IsAdminUser]
 
     def perform_destroy(self, instance):
-        instance.delete()
+        instance.hard_delete(self.request.user)
+
 
 
 class AdminAddressViewSet(viewsets.ModelViewSet):
-    queryset = Address.objects.filter(is_deleted=False).order_by("id")  # ✅ Added order_by
+    queryset = Address.objects.filter(is_deleted=False).order_by("id")
     serializer_class = AddressSerializer
     permission_classes = [IsAdminUser]
 
+    # def perform_destroy(self, instance):
+    #     instance.delete()
     def perform_destroy(self, instance):
-        instance.delete()
+        instance.hard_delete(self.request.user)
+

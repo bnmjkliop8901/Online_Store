@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from customer.views import (
     CustomerViewSet, AddressViewSet, RegisterView,
     RequestOTPView, VerifyOTPView, MeView,
-    AdminCustomerViewSet, AdminAddressViewSet
+    AdminCustomerViewSet, AdminAddressViewSet , LogoutView
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -20,7 +20,8 @@ admin_router.register(r'admin-addresses', AdminAddressViewSet, basename='admin-a
 
 urlpatterns = router.urls + admin_router.urls + [
     # path('register/', RegisterView.as_view(), name='register'),
-    path('auth/register/', RegisterView.as_view(), name='register'),   
+    path('auth/register/', RegisterView.as_view(), name='register'), 
+    path("auth/logout/", LogoutView.as_view(), name="logout"),  
     # path('otp/request/', RequestOTPView.as_view(), name='request_otp'),
     path('accounts/request-otp/', RequestOTPView.as_view(), name='request_otp'),    
     # path('otp/verify/', VerifyOTPView.as_view(), name='verify_otp'),

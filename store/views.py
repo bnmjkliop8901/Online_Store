@@ -184,8 +184,20 @@ class SellerCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [IsSeller]
 
+    # def get_queryset(self):
+    #     return Category.objects.filter(is_active=True)
+
     def get_queryset(self):
-        return Category.objects.filter(is_active=True)
+        user = self.request.user
+        return Category.objects.filter(
+            is_active=True,
+            products__storeitem__store__seller=user
+        ).distinct()
+
+
+
+
+
 
     def perform_create(self, serializer):
         serializer.save()

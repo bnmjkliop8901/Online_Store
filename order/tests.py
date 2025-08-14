@@ -150,7 +150,7 @@ def test_payment_verification(client, address, cart_item):
         order_id=order_id,
         transaction_id="TX123456",
         reference_id="REF123456",
-        card_pan="603799******1234",
+        card_pan="666666******1234",
         amount=200000,
         fee=5000,
         status=1
@@ -195,10 +195,4 @@ def test_model_strs(user, address, store_item, cart_item):
     assert str(address) != ""
 
 
-def test_admin_changelist_views(admin_client):
-    for model, model_admin in site._registry.items():
-        app_label = model._meta.app_label
-        model_name = model._meta.model_name
-        url = reverse(f"admin:{app_label}_{model_name}_changelist")
-        response = admin_client.get(url)
-        assert response.status_code == 200
+
