@@ -242,7 +242,7 @@ class VerifyOTPView(APIView):
 
 
 class CustomerViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Customer.objects.filter(is_deleted=False).order_by("id")  # ✅ Added order_by
+    queryset = Customer.objects.filter(is_deleted=False).order_by("id")  # Added order_by
     serializer_class = CustomerSerializer
     permission_classes = [IsAuthenticated]
 
@@ -251,7 +251,7 @@ class AddressViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Address.objects.filter(user=self.request.user, is_deleted=False).order_by("id")  # ✅ Added order_by
+        return Address.objects.filter(user=self.request.user, is_deleted=False).order_by("id")  # Added order_by
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
