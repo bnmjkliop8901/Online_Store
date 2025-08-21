@@ -17,11 +17,16 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# class StoreSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Store
+#         fields = '__all__'
 
+###############new
 class StoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Store
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name', 'description']  # exclude 'seller'
 
 
 class StoreItemBasicSerializer(serializers.ModelSerializer):
@@ -32,7 +37,10 @@ class StoreItemBasicSerializer(serializers.ModelSerializer):
 
 
 class ProductWriteSerializer(serializers.ModelSerializer):
-    categories = serializers.PrimaryKeyRelatedField(many=True , queryset=Category.objects.all())
+    categories = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Category.objects.all()
+    )
 
     class Meta:
         model = Product
@@ -99,7 +107,12 @@ class ProductDetailSerializer(ProductSerializer):
 
     def get_best_seller(self, obj):
         top_item = (
-            obj.storeitem_set.annotate(order_count=Count('orderitem')).filter(order_count__gt=0).order_by('-order_count').first())
+            obj.storeitem_set
+            .annotate(order_count=Count('orderitem'))
+            .filter(order_count__gt=0)
+            .order_by('-order_count')
+            .first()
+        )
         if top_item:
             return StoreItemBasicSerializer(top_item).data
         return None
@@ -128,6 +141,18 @@ class StoreItemSerializer(serializers.ModelSerializer):
         return data
 
 
+# class ReviewUserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['username', 'first_name', 'last_name', 'picture']
+
+# class ReviewSerializer(serializers.ModelSerializer):
+#     # user = ReviewUserSerializer(read_only=True)
+
+#     class Meta:
+#         model = Review
+#         fields = ['id', 'user', 'rating', 'comment', 'created_at']
+#         read_only_fields = ['id', 'created_at']
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:

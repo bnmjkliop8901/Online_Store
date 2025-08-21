@@ -17,7 +17,6 @@ from store.serializers import (
 from store.filters import ProductFilter
 from store.permissions import IsSeller
 from rest_framework.decorators import api_view , action
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
@@ -33,6 +32,20 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Category.objects.filter(is_active=True)
+
+
+# class ProductViewSet(viewsets.ModelViewSet):
+#     queryset = Product.objects.prefetch_related('categories', 'images').order_by('id')
+#     filterset_class = ProductFilter
+#     filter_backends = [DjangoFilterBackend]
+
+#     def get_serializer_class(self):
+#         if self.action in ['create', 'update', 'partial_update']:
+#             return ProductWriteSerializer
+#         if self.action == 'retrieve':
+#             return ProductDetailSerializer
+#         return ProductSerializer
+
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -85,6 +98,7 @@ class StoreViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
 
+    
 
     @action(detail=False, methods=['get', 'put'], url_path='me')
     def my_store(self, request):
@@ -96,13 +110,16 @@ class StoreViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(store)
             return Response(serializer.data)
 
-        
+        # PUT request
         serializer = self.get_serializer(store, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
 
+# class StoreItemViewSet(viewsets.ModelViewSet):
+#     queryset = StoreItem.objects.select_related('store', 'product')
+#     serializer_class = StoreItemSerializer
 class StoreItemViewSet(viewsets.ModelViewSet):
     serializer_class = StoreItemSerializer
 
@@ -150,6 +167,15 @@ class SellerProductViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Product.objects.filter(storeitem__store__seller=self.request.user).distinct()
 
+    # def perform_create(self, serializer):
+    #     product = serializer.save()
+    #     StoreItem.objects.create(
+    #         product=product,
+    #         store=self.request.user.stores.first(),
+    #         price=0,
+    #         stock=0,
+    #         is_active=False
+    #     )
     def perform_create(self, serializer):
         serializer.save()
 
@@ -158,10 +184,20 @@ class SellerCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [IsSeller]
 
+    # def get_queryset(self):
+    #     return Category.objects.filter(is_active=True)
 
     def get_queryset(self):
         user = self.request.user
-        return Category.objects.filter(is_active=True,products__storeitem__store__seller=user).distinct()
+        return Category.objects.filter(
+            is_active=True,
+            products__storeitem__store__seller=user
+        ).distinct()
+
+
+
+
+
 
     def perform_create(self, serializer):
         serializer.save()
@@ -173,13 +209,3 @@ def category_tree_view(request):
     top_categories = Category.objects.filter(parent=None, is_active=True)
     serializer = CategoryTreeSerializer(top_categories, many=True)
     return Response(serializer.data)
-
-# class CategoryTreeAPIView(APIView):
-#     """
-#     Returns top-level active categories with nested children.
-#     """
-
-#     def get(self, request, format=None):
-#         top_categories = Category.objects.filter(parent=None, is_active=True)
-#         serializer = CategoryTreeSerializer(top_categories, many=True)
-#         return Response(serializer.data)

@@ -164,4 +164,3 @@ def test_admin_delete_address(db):
     client.force_authenticate(user=admin)
     res = client.delete(f"/api/admin-addresses/{address.id}/")
     assert res.status_code == 204
-
