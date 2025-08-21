@@ -34,19 +34,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Category.objects.filter(is_active=True)
 
 
-# class ProductViewSet(viewsets.ModelViewSet):
-#     queryset = Product.objects.prefetch_related('categories', 'images').order_by('id')
-#     filterset_class = ProductFilter
-#     filter_backends = [DjangoFilterBackend]
-
-#     def get_serializer_class(self):
-#         if self.action in ['create', 'update', 'partial_update']:
-#             return ProductWriteSerializer
-#         if self.action == 'retrieve':
-#             return ProductDetailSerializer
-#         return ProductSerializer
-
-
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.prefetch_related('categories', 'images').order_by('id')
@@ -109,17 +96,12 @@ class StoreViewSet(viewsets.ModelViewSet):
         if request.method == 'GET':
             serializer = self.get_serializer(store)
             return Response(serializer.data)
-
-        # PUT request
+        
         serializer = self.get_serializer(store, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
-
-# class StoreItemViewSet(viewsets.ModelViewSet):
-#     queryset = StoreItem.objects.select_related('store', 'product')
-#     serializer_class = StoreItemSerializer
 class StoreItemViewSet(viewsets.ModelViewSet):
     serializer_class = StoreItemSerializer
 
@@ -167,15 +149,6 @@ class SellerProductViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Product.objects.filter(storeitem__store__seller=self.request.user).distinct()
 
-    # def perform_create(self, serializer):
-    #     product = serializer.save()
-    #     StoreItem.objects.create(
-    #         product=product,
-    #         store=self.request.user.stores.first(),
-    #         price=0,
-    #         stock=0,
-    #         is_active=False
-    #     )
     def perform_create(self, serializer):
         serializer.save()
 
@@ -184,9 +157,6 @@ class SellerCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [IsSeller]
 
-    # def get_queryset(self):
-    #     return Category.objects.filter(is_active=True)
-
     def get_queryset(self):
         user = self.request.user
         return Category.objects.filter(
@@ -194,14 +164,8 @@ class SellerCategoryViewSet(viewsets.ModelViewSet):
             products__storeitem__store__seller=user
         ).distinct()
 
-
-
-
-
-
     def perform_create(self, serializer):
         serializer.save()
-
 
 
 @api_view(['GET'])
