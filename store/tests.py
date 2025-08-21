@@ -30,7 +30,7 @@ def api_client(test_user):
 @pytest.fixture
 def category(db):
     image = generate_test_image("cat.jpg")
-    return Category.objects.create(name="Electronics", description="Tech stuff", image=image, is_active=True)   ##################
+    return Category.objects.create(name="Electronics", description="Tech stuff", image=image, is_active=True) 
 
 @pytest.fixture
 def product(db, category):
@@ -169,11 +169,6 @@ def test_seller_product_list(api_client, product, store):
     assert response.status_code == 200
     assert any(p["name"] == "Phone" for p in response.data["results"])
 
-# @pytest.mark.django_db
-# def test_seller_category_list(api_client, category):
-#     response = api_client.get("/api/seller/categories/")
-#     assert response.status_code == 200
-#     assert any(c["name"] == "Electronics" for c in response.data["results"])
 
 @pytest.mark.django_db
 def test_seller_category_create(api_client):

@@ -24,11 +24,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         quantity = data['quantity']
         user = self.context['request'].user
         cart, _ = Cart.objects.get_or_create(user=user)
-
-        existing_quantity = cart.items.filter(store_item=store_item).aggregate(
-            total=serializers.models.Sum('quantity')
-        )['total'] or 0
-
+        existing_quantity = cart.items.filter(store_item=store_item).aggregate(total=serializers.models.Sum('quantity'))['total'] or 0
         total_requested = existing_quantity + quantity
         if total_requested > store_item.stock:
             raise serializers.ValidationError(
@@ -42,7 +38,6 @@ class CartItemSerializer(serializers.ModelSerializer):
         cart, _ = Cart.objects.get_or_create(user=user)
         store_item = validated_data['store_item']
         quantity = validated_data['quantity']
-
         unit_price = store_item.discount_price or store_item.price
         total_price = unit_price * quantity
         discount_per_unit = (
@@ -117,13 +112,6 @@ class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
         fields = '__all__'
-
-
-
-
-
-
-
 
 
 

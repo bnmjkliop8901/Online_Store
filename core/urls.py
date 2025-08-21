@@ -37,18 +37,14 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path("", lambda request: HttpResponse("Welcome to the E-Commerce API 👋")),
+    path("", lambda request: HttpResponse("Welcome to the E-Commerce API ")),
 
     path('admin/', admin.site.urls),
 
-
-    # path('api/customers/', include('customer.urls')),
     path('api/', include('customer.urls')),
 
-    # path('api/store/', include('store.urls')),
     path('api/', include('store.urls')),
 
-    # path('api/order/', include('order.urls')),
     path('api/', include('order.urls')),
 
     path('swagger/', schema_view.with_ui(), name='schema-swagger-ui'),

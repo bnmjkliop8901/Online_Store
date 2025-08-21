@@ -8,7 +8,6 @@ from .views import (
     StoreItemViewSet,
     ReviewViewSet,
     category_tree_view,
-    SellerStoreItemViewSet,
     SellerStoreViewSet,
     SellerProductViewSet,
     SellerCategoryViewSet
@@ -19,7 +18,6 @@ router = DefaultRouter()
 router.register(r'categories', CategoryViewSet)
 router.register(r'products', ProductViewSet)
 router.register(r'product-images', ProductImageViewSet)
-# router.register(r'stores', StoreViewSet)
 router.register(r'mystore', StoreViewSet)
 router.register(r'store-items', StoreItemViewSet, basename='store-items')
 router.register(r'reviews', ReviewViewSet)

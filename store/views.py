@@ -51,11 +51,9 @@ class ProductViewSet(viewsets.ModelViewSet):
     def review_list(self, request, pk=None):
         product = self.get_object()
         reviews = Review.objects.filter(product=product).order_by('-created_at')
-
         paginator = PageNumberPagination()
         paginator.page_size = request.query_params.get('page_size', 5)
         paginated_reviews = paginator.paginate_queryset(reviews, request)
-
         serializer = ReviewSerializer(paginated_reviews, many=True)
         return paginator.get_paginated_response(serializer.data)
 
@@ -84,8 +82,6 @@ class StoreViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
-
-    
 
     @action(detail=False, methods=['get', 'put'], url_path='me')
     def my_store(self, request):
