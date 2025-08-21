@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-
+from django.http import HttpResponse
 
 
 schema_view = get_schema_view(
@@ -37,6 +37,8 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
+    path("", lambda request: HttpResponse("Welcome to the E-Commerce API 👋")),
+
     path('admin/', admin.site.urls),
 
 
@@ -53,6 +55,6 @@ urlpatterns = [
 ]
 
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# if settings.DEBUG:
+#     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

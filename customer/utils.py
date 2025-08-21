@@ -1,48 +1,48 @@
 import random
-import os
 import traceback
-from django.core.cache import cache
+import redis
+from django.conf import settings
 from django.core.mail import send_mail
 from kavenegar import KavenegarAPI
-from decouple import config
-from django.conf import settings
+
+
+redis_client = redis.StrictRedis.from_url(settings.REDIS_LOCATION, decode_responses=True)
 
 KAVENEGAR_API_KEY = settings.KAVENEGAR_API_KEY
 EMAIL_HOST_USER = settings.EMAIL_HOST_USER
 
-
-
-
-
 def generate_otp():
     return str(random.randint(100000, 999999))
 
+def store_otp(user_id, otp, ttl=300):
+    redis_client.setex(f"otp:{user_id}", ttl, otp)
 
+def get_otp(user_id):
+    return redis_client.get(f"otp:{user_id}")
+
+def delete_otp(user_id):
+    redis_client.delete(f"otp:{user_id}")
 
 def send_otp(user):
     otp = generate_otp()
-    cache.set(f"otp_{user.username}", otp, timeout=300)
-    print(f"OTP for {user.username}: {otp}")
+    store_otp(user.id, otp)
+    print(f"[DEV] OTP for {user.username}: {otp}")
     return otp
 
-
-
 def verify_otp(user, input_otp):
-    stored_otp = cache.get(f"otp_{user.username}")
-    return stored_otp == input_otp
-
-
+    stored = get_otp(user.id)
+    if stored and stored == input_otp:
+        delete_otp(user.id)
+        return True
+    return False
 
 def send_otp_email(email, otp):
     subject = 'Your Login OTP'
     message = f'Hi! Your one-time login code is: {otp}'
     send_mail(subject, message, EMAIL_HOST_USER, [email])
-    print(f"OTP sent via email to {email}")
-
-
+    print(f"[DEV] OTP sent via email to {email}")
 
 def send_otp_sms(phone, otp):
-    print("Loaded Kavenegar key:", KAVENEGAR_API_KEY)
     try:
         api = KavenegarAPI(KAVENEGAR_API_KEY)
         params = {
@@ -51,21 +51,16 @@ def send_otp_sms(phone, otp):
             'message': f'Your login code is: {otp}'
         }
         response = api.sms_send(params)
-        print("SMS sent:", response)
+        print("[DEV] SMS sent:", response)
         return response
-    except Exception as e:
-        print("SMS Error:\n", traceback.format_exc())
+    except Exception:
+        print("[DEV] SMS Error:\n", traceback.format_exc())
         return None
-
-
 
 def send_otp_with_fallback(user):
     otp = generate_otp()
-    cache.set(f"otp_{user.username}", otp, timeout=300)
-    print(f"Generated OTP for {user.username}: {otp}")
-
-    sms_response = send_otp_sms(user.phone, otp)
-
-    if sms_response is None:
-        print(f"SMS failed for {user.phone}. Fallback to email: {user.email}")
+    store_otp(user.id, otp)
+    print(f"[DEV] Generated OTP for {user.username}: {otp}")
+    if send_otp_sms(user.phone, otp) is None:
+        print(f"[DEV] SMS failed for {user.phone}. Fallback to email: {user.email}")
         send_otp_email(user.email, otp)

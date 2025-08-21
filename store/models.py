@@ -8,8 +8,6 @@ class Category(models.Model):
     is_active = models.BooleanField(default=True)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
 
-    # def __str__(self):
-        # return f"Category: {self.name}, Description: {self.description}, Active: {self.is_active}, Parent: {self.parent}"
     def __str__(self):
         parent_name = self.parent.name if self.parent else "None"
         return f"Category: {self.name}, Parent: {parent_name}"

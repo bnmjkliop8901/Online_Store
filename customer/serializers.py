@@ -2,10 +2,10 @@ from rest_framework import serializers
 from customer.models import Customer, Address
 
 
-class AddressCreateSerializer(serializers.ModelSerializer): # for create/update addresses
+class AddressCreateSerializer(serializers.ModelSerializer): 
     class Meta:
         model = Address
-        exclude = ['user', 'is_deleted'] # to set user automatically
+        exclude = ['user', 'is_deleted']
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
@@ -13,7 +13,7 @@ class AddressCreateSerializer(serializers.ModelSerializer): # for create/update 
 
 
 
-class AddressSerializer(serializers.ModelSerializer): # for list/view addresses
+class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         exclude = ['is_deleted', 'user']

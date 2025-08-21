@@ -9,6 +9,7 @@ from .views import (
     ReviewViewSet,
     category_tree_view,
     SellerStoreItemViewSet,
+    # CategoryTreeAPIView,
     SellerStoreViewSet,
     SellerProductViewSet,
     SellerCategoryViewSet
@@ -32,4 +33,5 @@ router.register(r'seller/categories', SellerCategoryViewSet, basename='seller-ca
 
 urlpatterns = [
     path('category-tree/', category_tree_view, name='category-tree'),
+    # path('category-tree/', CategoryTreeAPIView.as_view(), name='category-tree'),
 ] + router.urls

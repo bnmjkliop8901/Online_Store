@@ -100,7 +100,7 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+SWAGGER_USE_COMPAT_RENDERERS = False
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -133,12 +133,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = '/shared/static'
 
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = '/shared/media'
 
 
 # Default primary key field type
@@ -214,8 +215,9 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 
-SWAGGER_USE_COMPAT_RENDERERS = False
 
 
 KAVENEGAR_API_KEY = config("KAVENEGAR_API_KEY")
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+
+REDIS_LOCATION = config("REDIS_LOCATION")
